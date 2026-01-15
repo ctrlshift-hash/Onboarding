@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initCounterAnimations();
     initSmoothScroll();
     initCardHoverEffects();
+    initBagsAPIIntegration();
 });
 
 // ============================================
@@ -183,4 +184,86 @@ function initSmoothScroll() {
             }
         });
     });
+}
+
+// ============================================
+// BAGS.FM API INTEGRATION
+// ============================================
+
+function initBagsAPIIntegration() {
+    // Configuration
+    const CONFIG = {
+        updateInterval: 5 * 60 * 1000, // Update every 5 minutes (in milliseconds)
+        apiEndpoint: '/api/bags-stats' // Vercel serverless function
+    };
+
+    // Initial fetch
+    fetchAndUpdateStats();
+
+    // Set up periodic updates
+    setInterval(fetchAndUpdateStats, CONFIG.updateInterval);
+
+    async function fetchAndUpdateStats() {
+        try {
+            console.log('Fetching data from Bags API via serverless function...');
+
+            // Call our Vercel serverless function
+            const response = await fetch(CONFIG.apiEndpoint);
+
+            if (!response.ok) {
+                throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+            }
+
+            const data = await response.json();
+
+            if (!data.success) {
+                throw new Error(data.error || 'Unknown error');
+            }
+
+            // Update the "Total Raised" counter on the page
+            updateTotalRaisedDisplay(data.totalRaised);
+
+            console.log('Data updated successfully. Total raised:', data.totalRaised);
+            console.log('Tokens tracked:', data.tokenCount);
+
+        } catch (error) {
+            console.error('Error fetching Bags API data:', error);
+        }
+    }
+
+    function updateTotalRaisedDisplay(totalRaised) {
+        // Find the "Total Raised" counter element
+        const totalRaisedElement = document.querySelector('.result-value[data-target]');
+
+        if (totalRaisedElement) {
+            // Update the data-target attribute for future counter animations
+            totalRaisedElement.dataset.target = totalRaised;
+
+            // Animate the counter to the new value
+            animateCounterToValue(totalRaisedElement, totalRaised, '$');
+        }
+    }
+
+    function animateCounterToValue(element, targetValue, prefix = '') {
+        const currentValue = parseInt(element.textContent.replace(/[^0-9]/g, '')) || 0;
+        const duration = 1500;
+        const start = performance.now();
+
+        function update(currentTime) {
+            const elapsed = currentTime - start;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            const current = Math.floor(currentValue + (targetValue - currentValue) * eased);
+
+            element.textContent = prefix + current.toLocaleString();
+
+            if (progress < 1) {
+                requestAnimationFrame(update);
+            } else {
+                element.textContent = prefix + targetValue.toLocaleString();
+            }
+        }
+
+        requestAnimationFrame(update);
+    }
 }
