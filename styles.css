@@ -100,6 +100,12 @@ body {
     letter-spacing: -0.02em;
 }
 
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
 .nav-links {
     display: flex;
     align-items: center;
@@ -129,6 +135,36 @@ body {
 .nav-cta:hover {
     background: var(--text-secondary) !important;
     transform: translateY(-1px);
+}
+
+.nav-social {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-left: 24px;
+    border-left: 1px solid var(--border);
+}
+
+.nav-social-link {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    text-decoration: none;
+    border-radius: 6px;
+    transition: all 0.2s var(--ease);
+}
+
+.nav-social-link:hover {
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+}
+
+.nav-social-link svg {
+    width: 18px;
+    height: 18px;
 }
 
 /* ============================================
