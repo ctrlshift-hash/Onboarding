@@ -109,9 +109,15 @@ body {
 .logo {
     font-family: var(--font-serif);
     font-size: 1.25rem;
-    color: var(--text-primary);
+    color: var(--bags-green);
     text-decoration: none;
     letter-spacing: -0.02em;
+    font-weight: 700;
+    transition: opacity 0.2s var(--ease);
+}
+
+.logo:hover {
+    opacity: 0.8;
 }
 
 .nav-right {
@@ -791,7 +797,8 @@ body {
 .footer-logo {
     font-family: var(--font-serif);
     font-size: 1rem;
-    color: var(--text-primary);
+    color: var(--bags-green);
+    font-weight: 700;
 }
 
 .footer-text {
