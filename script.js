@@ -48,8 +48,17 @@ function initScrollAnimations() {
     const staggerGrids = [
         document.querySelector('.results-grid'),
         document.querySelector('.steps-grid'),
-        document.querySelector('.people-grid')
+        document.querySelector('.people-grid'),
+        document.querySelector('.testimonials-grid')
     ].filter(Boolean);
+
+    // About section elements
+    const aboutElements = [
+        document.querySelector('.about-content'),
+        document.querySelector('.about-image')
+    ].filter(Boolean);
+
+    aboutElements.forEach(el => el.classList.add('fade-in'));
 
     staggerGrids.forEach(grid => grid.classList.add('stagger'));
 
@@ -66,6 +75,7 @@ function initScrollAnimations() {
     });
 
     fadeElements.forEach(el => fadeObserver.observe(el));
+    aboutElements.forEach(el => fadeObserver.observe(el));
     staggerGrids.forEach(grid => fadeObserver.observe(grid));
 }
 
