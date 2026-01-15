@@ -54,9 +54,17 @@ export default async function handler(req, res) {
 
                 const data = await response.json();
 
+                // Log the raw response to debug
+                console.log(`API Response for ${tokenAddress}:`, JSON.stringify(data));
+
+                // Try multiple possible field names
+                const lifetimeFees = data.totalFees || data.lifetimeFees || data.total || data.fees || 0;
+
+                console.log(`Parsed fees for ${tokenAddress}:`, lifetimeFees);
+
                 return {
                     tokenAddress,
-                    lifetimeFees: data.totalFees || data.lifetimeFees || 0,
+                    lifetimeFees,
                     rawData: data
                 };
             } catch (error) {
