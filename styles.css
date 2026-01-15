@@ -784,6 +784,324 @@ body {
 }
 
 /* ============================================
+   PAGE HEADER (for sub-pages)
+   ============================================ */
+
+.page-header {
+    padding: 140px 0 60px;
+    text-align: center;
+    background: var(--bg-secondary);
+}
+
+.page-title {
+    font-family: var(--font-serif);
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 400;
+    margin-bottom: 12px;
+    letter-spacing: -0.02em;
+}
+
+.page-subtitle {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+/* ============================================
+   PAGE STATS (for people page)
+   ============================================ */
+
+.page-stats {
+    padding: 40px 0;
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border);
+}
+
+.page-stats-grid {
+    display: flex;
+    justify-content: center;
+    gap: 60px;
+}
+
+@media (max-width: 600px) {
+    .page-stats-grid {
+        flex-direction: column;
+        gap: 24px;
+        align-items: center;
+    }
+}
+
+.page-stat {
+    text-align: center;
+}
+
+.page-stat-value {
+    display: block;
+    font-family: var(--font-serif);
+    font-size: 1.75rem;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.page-stat-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* ============================================
+   ABOUT PREVIEW (home page)
+   ============================================ */
+
+.about-preview {
+    padding: var(--section-padding) 0;
+}
+
+.about-preview-content {
+    max-width: 700px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.about-preview-content .section-title {
+    margin-bottom: 24px;
+}
+
+.about-preview-content p {
+    color: var(--text-secondary);
+    font-size: 1.15rem;
+    line-height: 1.8;
+    margin-bottom: 24px;
+}
+
+/* ============================================
+   LINK ARROW
+   ============================================ */
+
+.link-arrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: gap 0.2s var(--ease);
+}
+
+.link-arrow:hover {
+    gap: 10px;
+}
+
+.link-arrow span {
+    transition: transform 0.2s var(--ease);
+}
+
+.link-arrow:hover span {
+    transform: translateX(2px);
+}
+
+/* ============================================
+   FEATURED TESTIMONIAL (home page)
+   ============================================ */
+
+.featured-testimonial {
+    padding: var(--section-padding) 0;
+}
+
+.featured-testimonial-card {
+    max-width: 700px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 48px;
+    background: var(--bg-secondary);
+    border-radius: 20px;
+}
+
+.featured-testimonial-card .quote-icon {
+    width: 32px;
+    height: 32px;
+    color: var(--border-strong);
+    margin-bottom: 24px;
+}
+
+.featured-testimonial-card blockquote {
+    font-family: var(--font-serif);
+    font-size: clamp(1.25rem, 3vw, 1.5rem);
+    line-height: 1.6;
+    color: var(--text-primary);
+    margin-bottom: 32px;
+    font-style: normal;
+}
+
+.featured-testimonial-card .testimonial-author {
+    justify-content: center;
+    border: none;
+    padding: 0;
+    margin-bottom: 24px;
+}
+
+.featured-testimonial-card .link-arrow {
+    margin-top: 8px;
+}
+
+/* ============================================
+   FEATURED PEOPLE (home page)
+   ============================================ */
+
+.featured-people {
+    padding: var(--section-padding) 0;
+    background: var(--bg-secondary);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.section-header .section-title {
+    margin-bottom: 0;
+    text-align: left;
+}
+
+.people-grid-preview {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 900px) {
+    .people-grid-preview {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .people-grid-preview {
+        grid-template-columns: 1fr;
+    }
+
+    .section-header {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+    }
+
+    .section-header .section-title {
+        text-align: center;
+    }
+}
+
+/* ============================================
+   ABOUT FULL PAGE
+   ============================================ */
+
+.about-full {
+    padding: var(--section-padding) 0;
+}
+
+.about-full .about-content h2 {
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    margin-top: 40px;
+    margin-bottom: 16px;
+}
+
+.about-full .about-content h2:first-child {
+    margin-top: 0;
+}
+
+.about-list {
+    list-style: none;
+    margin-top: 16px;
+}
+
+.about-list li {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    padding: 8px 0;
+    padding-left: 24px;
+    position: relative;
+}
+
+.about-list li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--text-muted);
+}
+
+/* ============================================
+   ABOUT STATS SECTION (about page)
+   ============================================ */
+
+.about-stats-section {
+    padding: var(--section-padding) 0;
+    background: var(--bg-secondary);
+}
+
+.about-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+}
+
+@media (max-width: 900px) {
+    .about-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 500px) {
+    .about-stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.about-stat-card {
+    text-align: center;
+    padding: 32px 20px;
+    background: var(--bg-primary);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+}
+
+.about-stat-card .about-stat-value {
+    display: block;
+    font-family: var(--font-serif);
+    font-size: 2rem;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.about-stat-card .about-stat-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+/* ============================================
+   PEOPLE FULL PAGE
+   ============================================ */
+
+.people-full {
+    padding: var(--section-padding) 0;
+}
+
+/* ============================================
+   TESTIMONIALS FULL PAGE
+   ============================================ */
+
+.testimonials-full {
+    padding: var(--section-padding) 0;
+}
+
+/* ============================================
+   NAV ACTIVE STATE
+   ============================================ */
+
+.nav-links a.active {
+    color: var(--text-primary);
+}
+
+/* ============================================
    RESPONSIVE
    ============================================ */
 
