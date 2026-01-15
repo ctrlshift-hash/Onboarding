@@ -19,6 +19,7 @@
     --border-strong: #dadce0;
 
     --success: #22c55e;
+    --bags-green: #00ff41;
 
     /* Typography */
     --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -55,6 +56,19 @@ body {
 ::selection {
     background: var(--text-primary);
     color: var(--bg-primary);
+}
+
+/* Bags.fm Links */
+.bags-link {
+    color: var(--bags-green);
+    text-decoration: none;
+    font-weight: 600;
+    transition: opacity 0.2s var(--ease);
+}
+
+.bags-link:hover {
+    opacity: 0.8;
+    text-decoration: underline;
 }
 
 /* Container */
@@ -1202,6 +1216,80 @@ body {
 .bagsfm-step p {
     color: var(--text-secondary);
     line-height: 1.6;
+}
+
+.bagsfm-how-to-claim {
+    margin-bottom: 100px;
+}
+
+.section-intro {
+    text-align: center;
+    font-size: 1.05rem;
+    color: var(--text-secondary);
+    max-width: 700px;
+    margin: 0 auto 50px;
+    line-height: 1.7;
+}
+
+.claim-steps {
+    max-width: 800px;
+    margin: 0 auto 40px;
+}
+
+.claim-step {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+    margin-bottom: 32px;
+    padding: 24px;
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+}
+
+.claim-step-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--bags-green);
+    color: #000;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.claim-step-content h3 {
+    font-size: 1.15rem;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.claim-step-content p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0;
+}
+
+.claim-note {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px 28px;
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    border-left: 4px solid var(--bags-green);
+}
+
+.claim-note p {
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.6;
+}
+
+.claim-note strong {
+    color: var(--text-primary);
 }
 
 .bagsfm-benefits {
