@@ -803,10 +803,11 @@ body {
    ANIMATIONS
    ============================================ */
 
+/* Fade in animation */
 .fade-in {
     opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
+    transform: translateY(30px);
+    transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
 }
 
 .fade-in.visible {
@@ -814,23 +815,190 @@ body {
     transform: translateY(0);
 }
 
+/* Fade in from left */
+.fade-left {
+    opacity: 0;
+    transform: translateX(-30px);
+    transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+}
+
+.fade-left.visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Fade in from right */
+.fade-right {
+    opacity: 0;
+    transform: translateX(30px);
+    transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+}
+
+.fade-right.visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Scale up animation */
+.scale-in {
+    opacity: 0;
+    transform: scale(0.9);
+    transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
+}
+
+.scale-in.visible {
+    opacity: 1;
+    transform: scale(1);
+}
+
 /* Stagger animation for grids */
 .stagger > * {
     opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.5s var(--ease), transform 0.5s var(--ease);
+    transform: translateY(30px);
+    transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
 }
 
 .stagger.visible > *:nth-child(1) { transition-delay: 0s; }
 .stagger.visible > *:nth-child(2) { transition-delay: 0.1s; }
-.stagger.visible > *:nth-child(3) { transition-delay: 0.2s; }
-.stagger.visible > *:nth-child(4) { transition-delay: 0.3s; }
-.stagger.visible > *:nth-child(5) { transition-delay: 0.4s; }
-.stagger.visible > *:nth-child(6) { transition-delay: 0.5s; }
+.stagger.visible > *:nth-child(3) { transition-delay: 0.15s; }
+.stagger.visible > *:nth-child(4) { transition-delay: 0.2s; }
+.stagger.visible > *:nth-child(5) { transition-delay: 0.25s; }
+.stagger.visible > *:nth-child(6) { transition-delay: 0.3s; }
+.stagger.visible > *:nth-child(7) { transition-delay: 0.35s; }
+.stagger.visible > *:nth-child(8) { transition-delay: 0.4s; }
+.stagger.visible > *:nth-child(9) { transition-delay: 0.45s; }
 
 .stagger.visible > * {
     opacity: 1;
     transform: translateY(0);
+}
+
+/* Hero title animation */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.hero-title {
+    animation: slideUp 1s var(--ease) 0.2s backwards;
+}
+
+.hero-subtitle {
+    animation: slideUp 1s var(--ease) 0.4s backwards;
+}
+
+.hero-cta {
+    animation: slideUp 1s var(--ease) 0.6s backwards;
+}
+
+/* Floating animation for badges */
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-6px);
+    }
+}
+
+.person-status {
+    animation: float 3s ease-in-out infinite;
+}
+
+/* Pulse animation for green elements */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.8;
+    }
+}
+
+.claim-step-icon {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+/* Smooth hover transitions */
+.person-card,
+.testimonial-card,
+.benefit-card,
+.type-card,
+.step-card {
+    transition: all 0.3s var(--ease);
+}
+
+.benefit-card:hover,
+.type-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.08);
+}
+
+.step-card:hover {
+    transform: translateY(-4px);
+}
+
+.step-card:hover .step-icon {
+    transform: scale(1.1);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+/* Number counter animation */
+@keyframes countUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.result-value {
+    animation: countUp 0.8s var(--ease) backwards;
+}
+
+.result-card:nth-child(1) .result-value { animation-delay: 0.1s; }
+.result-card:nth-child(2) .result-value { animation-delay: 0.2s; }
+.result-card:nth-child(3) .result-value { animation-delay: 0.3s; }
+.result-card:nth-child(4) .result-value { animation-delay: 0.4s; }
+
+/* Button shine effect */
+.btn-primary {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-primary:hover::before {
+    left: 100%;
+}
+
+/* Green glow effect for Bags.fm links */
+.bags-link {
+    position: relative;
+    transition: all 0.3s var(--ease);
+}
+
+.bags-link:hover {
+    text-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
 }
 
 /* ============================================

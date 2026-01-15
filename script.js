@@ -1,6 +1,6 @@
 // ============================================
-// ONBOARDING.DEV - Clean Professional JS
-// Subtle animations, nothing flashy
+// ONBOARDING.DEV - Enhanced Animations
+// Smooth, professional, engaging
 // ============================================
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initScrollAnimations();
     initCounterAnimations();
     initSmoothScroll();
+    initCardHoverEffects();
 });
 
 // ============================================
@@ -32,51 +33,50 @@ function initNavbar() {
 
 function initScrollAnimations() {
     // Elements to animate on scroll
-    const fadeElements = [
-        document.querySelector('.hero-eyebrow'),
-        document.querySelector('.hero-title'),
-        document.querySelector('.hero-subtitle'),
-        document.querySelector('.hero-cta'),
-        ...document.querySelectorAll('.section-title'),
-        ...document.querySelectorAll('.section-subtitle'),
-        document.querySelector('.cta-content')
-    ].filter(Boolean);
+    const fadeElements = document.querySelectorAll('.section-title, .section-subtitle, .page-subtitle, .cta-content, .bagsfm-intro, .section-intro');
+    const fadeLeftElements = document.querySelectorAll('.about-content, .testimonial-content');
+    const fadeRightElements = document.querySelectorAll('.about-image');
+    const scaleElements = document.querySelectorAll('.featured-testimonial-card, .bagsfm-cta');
 
     fadeElements.forEach(el => el.classList.add('fade-in'));
+    fadeLeftElements.forEach(el => el.classList.add('fade-left'));
+    fadeRightElements.forEach(el => el.classList.add('fade-right'));
+    scaleElements.forEach(el => el.classList.add('scale-in'));
 
     // Grids that stagger their children
-    const staggerGrids = [
-        document.querySelector('.results-grid'),
-        document.querySelector('.steps-grid'),
-        document.querySelector('.people-grid'),
-        document.querySelector('.testimonials-grid')
-    ].filter(Boolean);
-
-    // About section elements
-    const aboutElements = [
-        document.querySelector('.about-content'),
-        document.querySelector('.about-image')
-    ].filter(Boolean);
-
-    aboutElements.forEach(el => el.classList.add('fade-in'));
+    const staggerGrids = document.querySelectorAll(
+        '.results-grid, .steps-grid, .people-grid, .testimonials-grid, ' +
+        '.benefits-grid, .types-grid, .bagsfm-steps, .claim-steps, .about-stats-grid'
+    );
 
     staggerGrids.forEach(grid => grid.classList.add('stagger'));
 
-    // Observer for fade-in elements
+    // Intersection Observer with better settings
+    const observerOptions = {
+        threshold: 0.15,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
     const fadeObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.classList.add('visible');
+                // Unobserve after animating for better performance
+                fadeObserver.unobserve(entry.target);
             }
         });
-    }, {
-        threshold: 0.1,
-        rootMargin: '0px 0px -40px 0px'
-    });
+    }, observerOptions);
 
-    fadeElements.forEach(el => fadeObserver.observe(el));
-    aboutElements.forEach(el => fadeObserver.observe(el));
-    staggerGrids.forEach(grid => fadeObserver.observe(grid));
+    // Observe all animated elements
+    const allAnimatedElements = [
+        ...fadeElements,
+        ...fadeLeftElements,
+        ...fadeRightElements,
+        ...scaleElements,
+        ...staggerGrids
+    ];
+
+    allAnimatedElements.forEach(el => fadeObserver.observe(el));
 }
 
 // ============================================
@@ -91,6 +91,7 @@ function initCounterAnimations() {
             if (entry.isIntersecting && !entry.target.dataset.animated) {
                 animateCounter(entry.target);
                 entry.target.dataset.animated = 'true';
+                counterObserver.unobserve(entry.target);
             }
         });
     }, {
@@ -103,14 +104,14 @@ function initCounterAnimations() {
 function animateCounter(element) {
     const target = parseInt(element.dataset.target);
     const prefix = element.dataset.prefix || '';
-    const duration = 1500;
+    const duration = 2000;
     const start = performance.now();
 
     function update(currentTime) {
         const elapsed = currentTime - start;
         const progress = Math.min(elapsed / duration, 1);
 
-        // Ease out cubic
+        // Ease out cubic for smooth deceleration
         const eased = 1 - Math.pow(1 - progress, 3);
         const current = Math.floor(target * eased);
 
@@ -118,10 +119,46 @@ function animateCounter(element) {
 
         if (progress < 1) {
             requestAnimationFrame(update);
+        } else {
+            element.textContent = prefix + target.toLocaleString();
         }
     }
 
     requestAnimationFrame(update);
+}
+
+// ============================================
+// CARD HOVER EFFECTS
+// ============================================
+
+function initCardHoverEffects() {
+    // Add subtle tilt effect on mouse move for cards
+    const cards = document.querySelectorAll('.person-card, .testimonial-card, .benefit-card');
+
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transition = 'transform 0.1s ease';
+        });
+
+        card.addEventListener('mousemove', function(e) {
+            const rect = this.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+
+            const rotateX = (y - centerY) / 30;
+            const rotateY = (centerX - x) / 30;
+
+            this.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-6px)`;
+        });
+
+        card.addEventListener('mouseleave', function() {
+            this.style.transition = 'transform 0.3s ease';
+            this.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) translateY(0)';
+        });
+    });
 }
 
 // ============================================
@@ -131,8 +168,11 @@ function animateCounter(element) {
 function initSmoothScroll() {
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function(e) {
+            const href = this.getAttribute('href');
+            if (href === '#') return;
+
             e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
+            const target = document.querySelector(href);
 
             if (target) {
                 const offsetTop = target.offsetTop - 80;
