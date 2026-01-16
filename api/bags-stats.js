@@ -11,11 +11,13 @@ export default async function handler(req, res) {
     const BAGS_API_KEY = process.env.BAGS_API_KEY;
     const SOLANA_RPC_URL = process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com';
 
-    // Token data - addresses and names
+    // Token data - addresses, names, and claimed amounts (already claimed fees in SOL)
+    // The SDK only returns unclaimed fees, so we add previously claimed amounts as base
+    // These offsets should be updated periodically when creators claim their fees
     const TOKENS = [
-        { address: '9XzKDJ9wP9yqi9G5okp9UFNxFuhqyk5GNyUnnBaRBAGS', name: 'DATABUDDY' },
-        { address: '71qnmtNQYuSGMi7w8auGEJaStaB1zbJPa5ZZ6mZtBAGS', name: 'GITBRUV' },
-        { address: 'GZj4qMQFtwPpStknSaisn7shPJJ7Dv7wsuksEborBAGS', name: 'BOUNTY' },
+        { address: '9XzKDJ9wP9yqi9G5okp9UFNxFuhqyk5GNyUnnBaRBAGS', name: 'DATABUDDY', claimedSol: 8.5 },
+        { address: '71qnmtNQYuSGMi7w8auGEJaStaB1zbJPa5ZZ6mZtBAGS', name: 'GITBRUV', claimedSol: 7.0 },
+        { address: 'GZj4qMQFtwPpStknSaisn7shPJJ7Dv7wsuksEborBAGS', name: 'BOUNTY', claimedSol: 16.5 },
     ];
 
     if (!BAGS_API_KEY) {
@@ -33,15 +35,19 @@ export default async function handler(req, res) {
         const promises = TOKENS.map(async (token) => {
             try {
                 const feesLamports = await sdk.state.getTokenLifetimeFees(new PublicKey(token.address));
-                const feesSol = feesLamports / LAMPORTS_PER_SOL;
+                const unclaimedSol = feesLamports / LAMPORTS_PER_SOL;
+                // Total = unclaimed (from SDK) + already claimed (base offset)
+                const totalSol = unclaimedSol + (token.claimedSol || 0);
 
-                console.log(`Token ${token.name} (${token.address}): ${feesSol.toLocaleString()} SOL`);
+                console.log(`Token ${token.name}: ${unclaimedSol.toFixed(2)} unclaimed + ${token.claimedSol || 0} claimed = ${totalSol.toFixed(2)} SOL total`);
 
                 return {
                     tokenAddress: token.address,
                     name: token.name,
                     feesLamports,
-                    feesSol,
+                    unclaimedSol,
+                    claimedSol: token.claimedSol || 0,
+                    feesSol: totalSol,
                 };
             } catch (error) {
                 console.error(`Error fetching ${token.name}:`, error);
@@ -49,7 +55,7 @@ export default async function handler(req, res) {
                     tokenAddress: token.address,
                     name: token.name,
                     feesLamports: 0,
-                    feesSol: 0,
+                    feesSol: token.claimedSol || 0, // Still show claimed amount on error
                     error: error.message
                 };
             }
