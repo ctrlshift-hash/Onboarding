@@ -421,8 +421,8 @@ body {
 }
 
 .podium-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.1);
+    transform: translateY(-12px) scale(1.05);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
     border-color: var(--border-strong);
 }
 
@@ -432,7 +432,8 @@ body {
 }
 
 .podium-first .podium-card:hover {
-    box-shadow: 0 16px 48px rgba(255, 215, 0, 0.25);
+    transform: translateY(-14px) scale(1.08);
+    box-shadow: 0 24px 70px rgba(255, 215, 0, 0.35);
 }
 
 .podium-image {
