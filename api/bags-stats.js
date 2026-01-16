@@ -23,8 +23,7 @@ export default async function handler(req, res) {
     }
 
     try {
-        // Fetch lifetime fees for all tokens
-        // According to docs: "total lifetime fees collected" - this should be the complete total
+        // Fetch lifetime fees for all tokens (total lifetime fees collected)
         const promises = TOKENS.map(async (token) => {
             try {
                 const lifetimeFeesResponse = await fetch(
@@ -37,15 +36,12 @@ export default async function handler(req, res) {
                 }
 
                 const lifetimeFeesData = await lifetimeFeesResponse.json();
-                console.log(`Token ${token.name} lifetime fees response:`, JSON.stringify(lifetimeFeesData));
 
                 let totalSol = 0;
                 if (lifetimeFeesData.success && lifetimeFeesData.response) {
                     const lamports = BigInt(lifetimeFeesData.response);
                     totalSol = Number(lamports) / LAMPORTS_PER_SOL;
                 }
-
-                console.log(`Token ${token.name}: ${totalSol.toFixed(4)} SOL total`);
 
                 return {
                     tokenAddress: token.address,
