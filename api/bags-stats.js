@@ -11,13 +11,11 @@ export default async function handler(req, res) {
     const BAGS_API_KEY = process.env.BAGS_API_KEY;
     const SOLANA_RPC_URL = process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com';
 
-    // Token data - addresses, names, and claimed amounts (already claimed fees in SOL)
-    // The SDK only returns unclaimed fees, so we add previously claimed amounts as base
-    // These offsets should be updated periodically when creators claim their fees
+    // Token data - addresses and names
     const TOKENS = [
-        { address: '9XzKDJ9wP9yqi9G5okp9UFNxFuhqyk5GNyUnnBaRBAGS', name: 'DATABUDDY', claimedSol: 8.5 },
-        { address: '71qnmtNQYuSGMi7w8auGEJaStaB1zbJPa5ZZ6mZtBAGS', name: 'GITBRUV', claimedSol: 7.0 },
-        { address: 'GZj4qMQFtwPpStknSaisn7shPJJ7Dv7wsuksEborBAGS', name: 'BOUNTY', claimedSol: 16.5 },
+        { address: '9XzKDJ9wP9yqi9G5okp9UFNxFuhqyk5GNyUnnBaRBAGS', name: 'DATABUDDY' },
+        { address: '71qnmtNQYuSGMi7w8auGEJaStaB1zbJPa5ZZ6mZtBAGS', name: 'GITBRUV' },
+        { address: 'GZj4qMQFtwPpStknSaisn7shPJJ7Dv7wsuksEborBAGS', name: 'BOUNTY' },
     ];
 
     if (!BAGS_API_KEY) {
@@ -31,22 +29,44 @@ export default async function handler(req, res) {
         const connection = new Connection(SOLANA_RPC_URL);
         const sdk = new BagsSDK(BAGS_API_KEY, connection, "processed");
 
-        // Fetch lifetime fees for all tokens in parallel
+        // Fetch both unclaimed fees and claimed stats for all tokens
         const promises = TOKENS.map(async (token) => {
             try {
+                // Get unclaimed fees from SDK
                 const feesLamports = await sdk.state.getTokenLifetimeFees(new PublicKey(token.address));
                 const unclaimedSol = feesLamports / LAMPORTS_PER_SOL;
-                // Total = unclaimed (from SDK) + already claimed (base offset)
-                const totalSol = unclaimedSol + (token.claimedSol || 0);
 
-                console.log(`Token ${token.name}: ${unclaimedSol.toFixed(2)} unclaimed + ${token.claimedSol || 0} claimed = ${totalSol.toFixed(2)} SOL total`);
+                // Get claimed stats from REST API
+                let claimedSol = 0;
+                try {
+                    const claimStatsResponse = await fetch(
+                        `https://api.bags.fm/api/token-launch/claim-stats?tokenMint=${token.address}`,
+                        { headers: { 'x-api-key': BAGS_API_KEY } }
+                    );
+                    if (claimStatsResponse.ok) {
+                        const claimStats = await claimStatsResponse.json();
+                        // Sum up all claimed amounts (totalClaimed is in lamports as string)
+                        if (Array.isArray(claimStats)) {
+                            claimedSol = claimStats.reduce((sum, claimer) => {
+                                const claimed = parseInt(claimer.totalClaimed || '0', 10);
+                                return sum + (claimed / LAMPORTS_PER_SOL);
+                            }, 0);
+                        }
+                    }
+                } catch (claimError) {
+                    console.error(`Error fetching claim stats for ${token.name}:`, claimError);
+                }
+
+                // Total = unclaimed + claimed
+                const totalSol = unclaimedSol + claimedSol;
+
+                console.log(`Token ${token.name}: ${unclaimedSol.toFixed(2)} unclaimed + ${claimedSol.toFixed(2)} claimed = ${totalSol.toFixed(2)} SOL total`);
 
                 return {
                     tokenAddress: token.address,
                     name: token.name,
-                    feesLamports,
                     unclaimedSol,
-                    claimedSol: token.claimedSol || 0,
+                    claimedSol,
                     feesSol: totalSol,
                 };
             } catch (error) {
@@ -54,8 +74,7 @@ export default async function handler(req, res) {
                 return {
                     tokenAddress: token.address,
                     name: token.name,
-                    feesLamports: 0,
-                    feesSol: token.claimedSol || 0, // Still show claimed amount on error
+                    feesSol: 0,
                     error: error.message
                 };
             }
