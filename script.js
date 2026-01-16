@@ -89,6 +89,11 @@ function initCounterAnimations() {
 
     const counterObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
+            // Skip animation if data-skip-animation is set
+            if (entry.target.dataset.skipAnimation === 'true') {
+                return;
+            }
+
             if (entry.isIntersecting && !entry.target.dataset.animated) {
                 animateCounter(entry.target);
                 entry.target.dataset.animated = 'true';
@@ -99,7 +104,12 @@ function initCounterAnimations() {
         threshold: 0.5
     });
 
-    counters.forEach(counter => counterObserver.observe(counter));
+    counters.forEach(counter => {
+        // Skip observing if data-skip-animation is set
+        if (counter.dataset.skipAnimation !== 'true') {
+            counterObserver.observe(counter);
+        }
+    });
 }
 
 function animateCounter(element) {
@@ -238,15 +248,12 @@ function initBagsAPIIntegration() {
     }
 
     function updateTotalRaisedDisplay(totalRaised) {
-        // Find the "Total Raised" counter element
-        const totalRaisedElement = document.querySelector('.result-value[data-target]');
+        // Find the "Total Raised" counter element by ID
+        const totalRaisedElement = document.getElementById('total-raised-counter');
         const heroTotalElement = document.getElementById('hero-total-raised');
         const peopleTotalElement = document.getElementById('people-total-raised');
 
         if (totalRaisedElement) {
-            // Update the data-target attribute for future counter animations
-            totalRaisedElement.dataset.target = totalRaised;
-
             // Animate the counter to the new value
             animateCounterToValue(totalRaisedElement, totalRaised, '$');
         }
