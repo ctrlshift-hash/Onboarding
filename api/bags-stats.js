@@ -23,35 +23,56 @@ export default async function handler(req, res) {
     }
 
     try {
-        // Fetch lifetime fees for all tokens using REST API directly
+        // Fetch lifetime fees and claimed amounts for all tokens
         const promises = TOKENS.map(async (token) => {
             try {
-                // Use the REST API v2 endpoint for lifetime fees
-                const lifetimeFeesResponse = await fetch(
-                    `https://public-api-v2.bags.fm/api/v1/token-launch/lifetime-fees?tokenMint=${token.address}`,
-                    { headers: { 'x-api-key': BAGS_API_KEY } }
-                );
+                // Fetch both endpoints in parallel
+                const [lifetimeFeesResponse, claimStatsResponse] = await Promise.all([
+                    fetch(
+                        `https://public-api-v2.bags.fm/api/v1/token-launch/lifetime-fees?tokenMint=${token.address}`,
+                        { headers: { 'x-api-key': BAGS_API_KEY } }
+                    ),
+                    fetch(
+                        `https://public-api-v2.bags.fm/api/v1/token-launch/claim-stats?tokenMint=${token.address}`,
+                        { headers: { 'x-api-key': BAGS_API_KEY } }
+                    )
+                ]);
 
-                if (!lifetimeFeesResponse.ok) {
-                    throw new Error(`API returned ${lifetimeFeesResponse.status}`);
+                // Get unclaimed fees (lifetime-fees = currently unclaimed)
+                let unclaimedSol = 0;
+                if (lifetimeFeesResponse.ok) {
+                    const lifetimeFeesData = await lifetimeFeesResponse.json();
+                    console.log(`Token ${token.name} lifetime fees response:`, JSON.stringify(lifetimeFeesData));
+                    if (lifetimeFeesData.success && lifetimeFeesData.response) {
+                        const lamports = BigInt(lifetimeFeesData.response);
+                        unclaimedSol = Number(lamports) / LAMPORTS_PER_SOL;
+                    }
                 }
 
-                const lifetimeFeesData = await lifetimeFeesResponse.json();
-                console.log(`Token ${token.name} lifetime fees response:`, JSON.stringify(lifetimeFeesData));
-
-                // API returns { success: true, response: "<lamports as string>" }
-                let totalSol = 0;
-                if (lifetimeFeesData.success && lifetimeFeesData.response) {
-                    // Response is lamports as a string
-                    const lamports = BigInt(lifetimeFeesData.response);
-                    totalSol = Number(lamports) / LAMPORTS_PER_SOL;
+                // Get total claimed amounts from all users
+                let claimedSol = 0;
+                if (claimStatsResponse.ok) {
+                    const claimStatsData = await claimStatsResponse.json();
+                    console.log(`Token ${token.name} claim stats response:`, JSON.stringify(claimStatsData));
+                    // Response is { success: true, response: [{ totalClaimed: "lamports", ... }, ...] }
+                    if (claimStatsData.success && Array.isArray(claimStatsData.response)) {
+                        claimedSol = claimStatsData.response.reduce((sum, claimer) => {
+                            const claimed = BigInt(claimer.totalClaimed || '0');
+                            return sum + Number(claimed) / LAMPORTS_PER_SOL;
+                        }, 0);
+                    }
                 }
 
-                console.log(`Token ${token.name}: ${totalSol.toFixed(4)} SOL total`);
+                // Total earnings = unclaimed + claimed
+                const totalSol = unclaimedSol + claimedSol;
+
+                console.log(`Token ${token.name}: ${unclaimedSol.toFixed(4)} unclaimed + ${claimedSol.toFixed(4)} claimed = ${totalSol.toFixed(4)} SOL total`);
 
                 return {
                     tokenAddress: token.address,
                     name: token.name,
+                    unclaimedSol,
+                    claimedSol,
                     feesSol: totalSol,
                 };
             } catch (error) {
