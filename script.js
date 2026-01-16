@@ -281,6 +281,19 @@ function initBagsAPIIntegration() {
                 if (amountElement) {
                     animateCounterToValue(amountElement, token.amountUSD || 0, '$');
                 }
+
+                // Update icon if available from API
+                if (token.iconUrl) {
+                    const imgElement = podiumItem.querySelector('.podium-image img');
+                    if (imgElement) {
+                        imgElement.src = token.iconUrl;
+                        imgElement.style.display = 'block';
+                        const placeholder = imgElement.nextElementSibling;
+                        if (placeholder && placeholder.classList.contains('podium-placeholder')) {
+                            placeholder.style.display = 'none';
+                        }
+                    }
+                }
             }
         });
     }

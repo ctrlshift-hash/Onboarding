@@ -1,5 +1,5 @@
 // Vercel Serverless Function to fetch Bags.fm data using REST API
-import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { LAMPORTS_PER_SOL, Connection, PublicKey } from "@solana/web3.js";
 
 export default async function handler(req, res) {
     // Only allow GET requests
@@ -23,9 +23,13 @@ export default async function handler(req, res) {
     }
 
     try {
-        // Fetch lifetime fees for all tokens (total lifetime fees collected)
+        // Initialize Solana connection for metadata
+        const connection = new Connection(process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com');
+
+        // Fetch lifetime fees and token metadata for all tokens
         const promises = TOKENS.map(async (token) => {
             try {
+                // Fetch lifetime fees
                 const lifetimeFeesResponse = await fetch(
                     `https://public-api-v2.bags.fm/api/v1/token-launch/lifetime-fees?tokenMint=${token.address}`,
                     { headers: { 'x-api-key': BAGS_API_KEY } }
@@ -43,10 +47,33 @@ export default async function handler(req, res) {
                     totalSol = Number(lamports) / LAMPORTS_PER_SOL;
                 }
 
+                // Try to fetch token metadata from Solana
+                let iconUrl = null;
+                try {
+                    const mintPubkey = new PublicKey(token.address);
+                    const accountInfo = await connection.getParsedAccountInfo(mintPubkey);
+
+                    // Try to get metadata from token extensions or metaplex
+                    if (accountInfo.value?.data && typeof accountInfo.value.data === 'object' && 'parsed' in accountInfo.value.data) {
+                        const metadata = accountInfo.value.data.parsed?.info?.extensions?.metadata;
+                        if (metadata?.uri) {
+                            // Fetch metadata JSON
+                            const metadataResponse = await fetch(metadata.uri);
+                            if (metadataResponse.ok) {
+                                const metadataJson = await metadataResponse.json();
+                                iconUrl = metadataJson.image || null;
+                            }
+                        }
+                    }
+                } catch (metadataError) {
+                    console.error(`Error fetching metadata for ${token.name}:`, metadataError);
+                }
+
                 return {
                     tokenAddress: token.address,
                     name: token.name,
                     feesSol: totalSol,
+                    iconUrl,
                 };
             } catch (error) {
                 console.error(`Error fetching ${token.name}:`, error);
@@ -54,6 +81,7 @@ export default async function handler(req, res) {
                     tokenAddress: token.address,
                     name: token.name,
                     feesSol: 0,
+                    iconUrl: null,
                     error: error.message
                 };
             }
@@ -91,7 +119,8 @@ export default async function handler(req, res) {
             tokenCount: TOKENS.length,
             tokens: results.map(r => ({
                 ...r,
-                amountUSD: Math.round((r.feesSol || 0) * solPrice) // Individual USD amounts with real SOL price
+                amountUSD: Math.round((r.feesSol || 0) * solPrice), // Individual USD amounts with real SOL price
+                iconUrl: r.iconUrl // Token icon URL from metadata
             })),
             timestamp: new Date().toISOString()
         });
