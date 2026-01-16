@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@bagsfm/bags-sdk": "^1.2.5",
+    "@solana/web3.js": "^1.98.4"
+  }
+}

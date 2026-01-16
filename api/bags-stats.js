@@ -1,5 +1,6 @@
-// Vercel Serverless Function to fetch Bags.fm data
-// This keeps your API key secure in environment variables
+// Vercel Serverless Function to fetch Bags.fm data using the SDK
+import { BagsSDK } from "@bagsfm/bags-sdk";
+import { LAMPORTS_PER_SOL, PublicKey, Connection } from "@solana/web3.js";
 
 export default async function handler(req, res) {
     // Only allow GET requests
@@ -8,13 +9,13 @@ export default async function handler(req, res) {
     }
 
     const BAGS_API_KEY = process.env.BAGS_API_KEY;
+    const SOLANA_RPC_URL = process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com';
 
-    // Token addresses - these are public blockchain data, no need to hide them
+    // Token addresses - these are public blockchain data
     const TOKEN_ADDRESSES = [
         '9XzKDJ9wP9yqi9G5okp9UFNxFuhqyk5GNyUnnBaRBAGS',
         '71qnmtNQYuSGMi7w8auGEJaStaB1zbJPa5ZZ6mZtBAGS',
         'GZj4qMQFtwPpStknSaisn7shPJJ7Dv7wsuksEborBAGS',
-        // Add more token addresses here as needed
     ];
 
     if (!BAGS_API_KEY) {
@@ -23,67 +24,52 @@ export default async function handler(req, res) {
         });
     }
 
-    if (TOKEN_ADDRESSES.length === 0) {
-        return res.status(500).json({
-            error: 'No token addresses configured. Add them to api/bags-stats.js'
-        });
-    }
-
     try {
-        const addresses = TOKEN_ADDRESSES;
-        const baseURL = 'https://public-api-v2.bags.fm/api/v1';
+        // Initialize SDK
+        const connection = new Connection(SOLANA_RPC_URL);
+        const sdk = new BagsSDK(BAGS_API_KEY, connection, "processed");
 
         // Fetch lifetime fees for all tokens in parallel
-        const promises = addresses.map(async (tokenAddress) => {
+        const promises = TOKEN_ADDRESSES.map(async (tokenAddress) => {
             try {
-                const response = await fetch(
-                    `${baseURL}/token-launch/lifetime-fees?tokenMint=${tokenAddress}`,
-                    {
-                        method: 'GET',
-                        headers: {
-                            'x-api-key': BAGS_API_KEY,
-                            'Content-Type': 'application/json'
-                        }
-                    }
-                );
+                const feesLamports = await sdk.state.getTokenLifetimeFees(new PublicKey(tokenAddress));
+                const feesSol = feesLamports / LAMPORTS_PER_SOL;
 
-                if (!response.ok) {
-                    console.error(`API error for ${tokenAddress}: ${response.status}`);
-                    return { tokenAddress, lifetimeFees: 0, error: response.statusText };
-                }
-
-                const data = await response.json();
-
-                // Log the raw response to debug
-                console.log(`API Response for ${tokenAddress}:`, JSON.stringify(data));
-
-                // Try multiple possible field names
-                const lifetimeFees = data.totalFees || data.lifetimeFees || data.total || data.fees || 0;
-
-                console.log(`Parsed fees for ${tokenAddress}:`, lifetimeFees);
+                console.log(`Token ${tokenAddress}: ${feesSol.toLocaleString()} SOL`);
 
                 return {
                     tokenAddress,
-                    lifetimeFees,
-                    rawData: data
+                    feesLamports,
+                    feesSol,
                 };
             } catch (error) {
                 console.error(`Error fetching ${tokenAddress}:`, error);
-                return { tokenAddress, lifetimeFees: 0, error: error.message };
+                return {
+                    tokenAddress,
+                    feesLamports: 0,
+                    feesSol: 0,
+                    error: error.message
+                };
             }
         });
 
         const results = await Promise.all(promises);
 
-        // Calculate totals
-        const totalRaised = results.reduce((sum, result) => sum + (result.lifetimeFees || 0), 0);
-        const tokenCount = addresses.length;
+        // Calculate totals in SOL
+        const totalSol = results.reduce((sum, result) => sum + (result.feesSol || 0), 0);
+
+        // Convert to USD (assuming a rough SOL price, or you can fetch real-time price)
+        // For now, let's just return the SOL amount
+        const totalRaisedUSD = totalSol * 100; // Placeholder conversion, adjust based on real SOL price
+
+        console.log(`Total raised: ${totalSol} SOL (~$${totalRaisedUSD.toLocaleString()})`);
 
         // Return aggregated data
         res.status(200).json({
             success: true,
-            totalRaised,
-            tokenCount,
+            totalRaised: Math.round(totalRaisedUSD),
+            totalSol: totalSol,
+            tokenCount: TOKEN_ADDRESSES.length,
             tokens: results,
             timestamp: new Date().toISOString()
         });
