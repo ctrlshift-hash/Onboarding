@@ -226,6 +226,9 @@ function initBagsAPIIntegration() {
             // Update individual token amounts on podium
             updatePodiumAmounts(data.tokens);
 
+            // Update featured people section with real data
+            updateFeaturedPeople(data.tokens);
+
             console.log('Data updated successfully. Total raised:', data.totalRaised);
             console.log('Tokens tracked:', data.tokenCount);
 
@@ -308,5 +311,38 @@ function initBagsAPIIntegration() {
                 }
             }
         });
+    }
+
+    function updateFeaturedPeople(tokens) {
+        if (!tokens || !tokens.length) return;
+
+        const featuredGrid = document.getElementById('featured-people-grid');
+        if (!featuredGrid) return;
+
+        // Sort by amount (highest first)
+        const sortedTokens = [...tokens].sort((a, b) => (b.amountUSD || 0) - (a.amountUSD || 0));
+
+        // Create cards HTML
+        const cardsHTML = sortedTokens.map(token => `
+            <div class="person-card">
+                <div class="person-header">
+                    <div class="person-avatar">${token.name.charAt(0)}</div>
+                    <div class="person-info">
+                        <h3 class="person-name">@${token.name.toLowerCase()}_project</h3>
+                        <span class="person-project">${token.name}</span>
+                    </div>
+                    <span class="person-status">Active</span>
+                </div>
+                <div class="person-results">
+                    <div class="person-stat">
+                        <span class="person-stat-value">$${(token.amountUSD || 0).toLocaleString()}</span>
+                        <span class="person-stat-label">Fees Earned</span>
+                    </div>
+                </div>
+                <span class="person-date">January 2025</span>
+            </div>
+        `).join('');
+
+        featuredGrid.innerHTML = cardsHTML;
     }
 }
