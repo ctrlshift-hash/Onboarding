@@ -403,6 +403,8 @@ body {
     align-items: center;
     flex: 1;
     max-width: 200px;
+    text-decoration: none;
+    color: inherit;
 }
 
 .podium-card {
