@@ -1,6 +1,5 @@
-// Vercel Serverless Function to fetch Bags.fm data using the SDK
-import { BagsSDK } from "@bagsfm/bags-sdk";
-import { LAMPORTS_PER_SOL, PublicKey, Connection } from "@solana/web3.js";
+// Vercel Serverless Function to fetch Bags.fm data using REST API
+import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 
 export default async function handler(req, res) {
     // Only allow GET requests
@@ -9,7 +8,6 @@ export default async function handler(req, res) {
     }
 
     const BAGS_API_KEY = process.env.BAGS_API_KEY;
-    const SOLANA_RPC_URL = process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com';
 
     // Token data - addresses and names
     const TOKENS = [
@@ -25,48 +23,48 @@ export default async function handler(req, res) {
     }
 
     try {
-        // Initialize SDK
-        const connection = new Connection(SOLANA_RPC_URL);
-        const sdk = new BagsSDK(BAGS_API_KEY, connection, "processed");
-
-        // Fetch both unclaimed fees and claimed stats for all tokens
+        // Fetch lifetime fees for all tokens using REST API directly
         const promises = TOKENS.map(async (token) => {
             try {
-                // Get unclaimed fees from SDK
-                const feesLamports = await sdk.state.getTokenLifetimeFees(new PublicKey(token.address));
-                const unclaimedSol = feesLamports / LAMPORTS_PER_SOL;
+                // Use the REST API v2 endpoint for lifetime fees
+                const lifetimeFeesResponse = await fetch(
+                    `https://public-api-v2.bags.fm/api/v1/token-launch/lifetime-fees?tokenMint=${token.address}`,
+                    { headers: { 'x-api-key': BAGS_API_KEY } }
+                );
 
-                // Get claimed stats from REST API
-                let claimedSol = 0;
-                try {
-                    const claimStatsResponse = await fetch(
-                        `https://api.bags.fm/api/token-launch/claim-stats?tokenMint=${token.address}`,
-                        { headers: { 'x-api-key': BAGS_API_KEY } }
-                    );
-                    if (claimStatsResponse.ok) {
-                        const claimStats = await claimStatsResponse.json();
-                        // Sum up all claimed amounts (totalClaimed is in lamports as string)
-                        if (Array.isArray(claimStats)) {
-                            claimedSol = claimStats.reduce((sum, claimer) => {
-                                const claimed = parseInt(claimer.totalClaimed || '0', 10);
-                                return sum + (claimed / LAMPORTS_PER_SOL);
-                            }, 0);
-                        }
-                    }
-                } catch (claimError) {
-                    console.error(`Error fetching claim stats for ${token.name}:`, claimError);
+                if (!lifetimeFeesResponse.ok) {
+                    throw new Error(`API returned ${lifetimeFeesResponse.status}`);
                 }
 
-                // Total = unclaimed + claimed
-                const totalSol = unclaimedSol + claimedSol;
+                const lifetimeFeesData = await lifetimeFeesResponse.json();
+                console.log(`Token ${token.name} lifetime fees response:`, JSON.stringify(lifetimeFeesData));
 
-                console.log(`Token ${token.name}: ${unclaimedSol.toFixed(2)} unclaimed + ${claimedSol.toFixed(2)} claimed = ${totalSol.toFixed(2)} SOL total`);
+                // Parse the response - could be in lamports or SOL depending on API
+                let totalSol = 0;
+                if (typeof lifetimeFeesData === 'number') {
+                    // If it's a raw number, assume lamports
+                    totalSol = lifetimeFeesData / LAMPORTS_PER_SOL;
+                } else if (lifetimeFeesData.lifetimeFees !== undefined) {
+                    // If it's an object with lifetimeFees field
+                    totalSol = Number(lifetimeFeesData.lifetimeFees) / LAMPORTS_PER_SOL;
+                } else if (lifetimeFeesData.totalFees !== undefined) {
+                    totalSol = Number(lifetimeFeesData.totalFees) / LAMPORTS_PER_SOL;
+                } else if (lifetimeFeesData.fees !== undefined) {
+                    totalSol = Number(lifetimeFeesData.fees) / LAMPORTS_PER_SOL;
+                } else if (lifetimeFeesData.total !== undefined) {
+                    totalSol = Number(lifetimeFeesData.total) / LAMPORTS_PER_SOL;
+                } else if (lifetimeFeesData.amount !== undefined) {
+                    totalSol = Number(lifetimeFeesData.amount) / LAMPORTS_PER_SOL;
+                } else if (lifetimeFeesData.sol !== undefined) {
+                    // Already in SOL
+                    totalSol = Number(lifetimeFeesData.sol);
+                }
+
+                console.log(`Token ${token.name}: ${totalSol.toFixed(4)} SOL total`);
 
                 return {
                     tokenAddress: token.address,
                     name: token.name,
-                    unclaimedSol,
-                    claimedSol,
                     feesSol: totalSol,
                 };
             } catch (error) {
