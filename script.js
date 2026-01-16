@@ -317,7 +317,7 @@ function initBagsAPIIntegration() {
         if (!tokens || !tokens.length) return;
 
         const featuredGrid = document.getElementById('featured-people-grid');
-        if (!featuredGrid) return;
+        const peopleFullGrid = document.getElementById('people-full-grid');
 
         // Sort by amount (highest first)
         const sortedTokens = [...tokens].sort((a, b) => (b.amountUSD || 0) - (a.amountUSD || 0));
@@ -343,6 +343,14 @@ function initBagsAPIIntegration() {
             </div>
         `).join('');
 
-        featuredGrid.innerHTML = cardsHTML;
+        // Update featured people on homepage
+        if (featuredGrid) {
+            featuredGrid.innerHTML = cardsHTML;
+        }
+
+        // Update full people grid on people page
+        if (peopleFullGrid) {
+            peopleFullGrid.innerHTML = cardsHTML;
+        }
     }
 }
