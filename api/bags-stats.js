@@ -39,25 +39,12 @@ export default async function handler(req, res) {
                 const lifetimeFeesData = await lifetimeFeesResponse.json();
                 console.log(`Token ${token.name} lifetime fees response:`, JSON.stringify(lifetimeFeesData));
 
-                // Parse the response - could be in lamports or SOL depending on API
+                // API returns { success: true, response: "<lamports as string>" }
                 let totalSol = 0;
-                if (typeof lifetimeFeesData === 'number') {
-                    // If it's a raw number, assume lamports
-                    totalSol = lifetimeFeesData / LAMPORTS_PER_SOL;
-                } else if (lifetimeFeesData.lifetimeFees !== undefined) {
-                    // If it's an object with lifetimeFees field
-                    totalSol = Number(lifetimeFeesData.lifetimeFees) / LAMPORTS_PER_SOL;
-                } else if (lifetimeFeesData.totalFees !== undefined) {
-                    totalSol = Number(lifetimeFeesData.totalFees) / LAMPORTS_PER_SOL;
-                } else if (lifetimeFeesData.fees !== undefined) {
-                    totalSol = Number(lifetimeFeesData.fees) / LAMPORTS_PER_SOL;
-                } else if (lifetimeFeesData.total !== undefined) {
-                    totalSol = Number(lifetimeFeesData.total) / LAMPORTS_PER_SOL;
-                } else if (lifetimeFeesData.amount !== undefined) {
-                    totalSol = Number(lifetimeFeesData.amount) / LAMPORTS_PER_SOL;
-                } else if (lifetimeFeesData.sol !== undefined) {
-                    // Already in SOL
-                    totalSol = Number(lifetimeFeesData.sol);
+                if (lifetimeFeesData.success && lifetimeFeesData.response) {
+                    // Response is lamports as a string
+                    const lamports = BigInt(lifetimeFeesData.response);
+                    totalSol = Number(lamports) / LAMPORTS_PER_SOL;
                 }
 
                 console.log(`Token ${token.name}: ${totalSol.toFixed(4)} SOL total`);
