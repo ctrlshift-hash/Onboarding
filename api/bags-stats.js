@@ -23,56 +23,33 @@ export default async function handler(req, res) {
     }
 
     try {
-        // Fetch lifetime fees and claimed amounts for all tokens
+        // Fetch lifetime fees for all tokens
+        // According to docs: "total lifetime fees collected" - this should be the complete total
         const promises = TOKENS.map(async (token) => {
             try {
-                // Fetch both endpoints in parallel
-                const [lifetimeFeesResponse, claimStatsResponse] = await Promise.all([
-                    fetch(
-                        `https://public-api-v2.bags.fm/api/v1/token-launch/lifetime-fees?tokenMint=${token.address}`,
-                        { headers: { 'x-api-key': BAGS_API_KEY } }
-                    ),
-                    fetch(
-                        `https://public-api-v2.bags.fm/api/v1/token-launch/claim-stats?tokenMint=${token.address}`,
-                        { headers: { 'x-api-key': BAGS_API_KEY } }
-                    )
-                ]);
+                const lifetimeFeesResponse = await fetch(
+                    `https://public-api-v2.bags.fm/api/v1/token-launch/lifetime-fees?tokenMint=${token.address}`,
+                    { headers: { 'x-api-key': BAGS_API_KEY } }
+                );
 
-                // Get unclaimed fees (lifetime-fees = currently unclaimed)
-                let unclaimedSol = 0;
-                if (lifetimeFeesResponse.ok) {
-                    const lifetimeFeesData = await lifetimeFeesResponse.json();
-                    console.log(`Token ${token.name} lifetime fees response:`, JSON.stringify(lifetimeFeesData));
-                    if (lifetimeFeesData.success && lifetimeFeesData.response) {
-                        const lamports = BigInt(lifetimeFeesData.response);
-                        unclaimedSol = Number(lamports) / LAMPORTS_PER_SOL;
-                    }
+                if (!lifetimeFeesResponse.ok) {
+                    throw new Error(`API returned ${lifetimeFeesResponse.status}`);
                 }
 
-                // Get total claimed amounts from all users
-                let claimedSol = 0;
-                if (claimStatsResponse.ok) {
-                    const claimStatsData = await claimStatsResponse.json();
-                    console.log(`Token ${token.name} claim stats response:`, JSON.stringify(claimStatsData));
-                    // Response is { success: true, response: [{ totalClaimed: "lamports", ... }, ...] }
-                    if (claimStatsData.success && Array.isArray(claimStatsData.response)) {
-                        claimedSol = claimStatsData.response.reduce((sum, claimer) => {
-                            const claimed = BigInt(claimer.totalClaimed || '0');
-                            return sum + Number(claimed) / LAMPORTS_PER_SOL;
-                        }, 0);
-                    }
+                const lifetimeFeesData = await lifetimeFeesResponse.json();
+                console.log(`Token ${token.name} lifetime fees response:`, JSON.stringify(lifetimeFeesData));
+
+                let totalSol = 0;
+                if (lifetimeFeesData.success && lifetimeFeesData.response) {
+                    const lamports = BigInt(lifetimeFeesData.response);
+                    totalSol = Number(lamports) / LAMPORTS_PER_SOL;
                 }
 
-                // Total earnings = unclaimed + claimed
-                const totalSol = unclaimedSol + claimedSol;
-
-                console.log(`Token ${token.name}: ${unclaimedSol.toFixed(4)} unclaimed + ${claimedSol.toFixed(4)} claimed = ${totalSol.toFixed(4)} SOL total`);
+                console.log(`Token ${token.name}: ${totalSol.toFixed(4)} SOL total`);
 
                 return {
                     tokenAddress: token.address,
                     name: token.name,
-                    unclaimedSol,
-                    claimedSol,
                     feesSol: totalSol,
                 };
             } catch (error) {
