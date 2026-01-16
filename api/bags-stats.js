@@ -60,9 +60,21 @@ export default async function handler(req, res) {
         // Calculate totals in SOL
         const totalSol = results.reduce((sum, result) => sum + (result.feesSol || 0), 0);
 
-        // Convert to USD (assuming a rough SOL price, or you can fetch real-time price)
-        // For now, let's just return the SOL amount
-        const totalRaisedUSD = totalSol * 100; // Placeholder conversion, adjust based on real SOL price
+        // Fetch real-time SOL price from CoinGecko
+        let solPrice = 180; // Fallback price
+        try {
+            const priceResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd');
+            const priceData = await priceResponse.json();
+            if (priceData.solana && priceData.solana.usd) {
+                solPrice = priceData.solana.usd;
+            }
+            console.log(`Current SOL price: $${solPrice}`);
+        } catch (priceError) {
+            console.error('Error fetching SOL price, using fallback:', priceError);
+        }
+
+        // Convert to USD using real-time price
+        const totalRaisedUSD = totalSol * solPrice;
 
         console.log(`Total raised: ${totalSol} SOL (~$${totalRaisedUSD.toLocaleString()})`);
 
@@ -71,10 +83,11 @@ export default async function handler(req, res) {
             success: true,
             totalRaised: Math.round(totalRaisedUSD),
             totalSol: totalSol,
+            solPrice: solPrice,
             tokenCount: TOKENS.length,
             tokens: results.map(r => ({
                 ...r,
-                amountUSD: Math.round((r.feesSol || 0) * 100) // Individual USD amounts
+                amountUSD: Math.round((r.feesSol || 0) * solPrice) // Individual USD amounts with real SOL price
             })),
             timestamp: new Date().toISOString()
         });
