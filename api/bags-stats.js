@@ -11,11 +11,11 @@ export default async function handler(req, res) {
     const BAGS_API_KEY = process.env.BAGS_API_KEY;
     const SOLANA_RPC_URL = process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com';
 
-    // Token addresses - these are public blockchain data
-    const TOKEN_ADDRESSES = [
-        '9XzKDJ9wP9yqi9G5okp9UFNxFuhqyk5GNyUnnBaRBAGS',
-        '71qnmtNQYuSGMi7w8auGEJaStaB1zbJPa5ZZ6mZtBAGS',
-        'GZj4qMQFtwPpStknSaisn7shPJJ7Dv7wsuksEborBAGS',
+    // Token data - addresses and names
+    const TOKENS = [
+        { address: '9XzKDJ9wP9yqi9G5okp9UFNxFuhqyk5GNyUnnBaRBAGS', name: 'DATABUDDY' },
+        { address: '71qnmtNQYuSGMi7w8auGEJaStaB1zbJPa5ZZ6mZtBAGS', name: 'GITBRUV' },
+        { address: 'GZj4qMQFtwPpStknSaisn7shPJJ7Dv7wsuksEborBAGS', name: 'BOUNTY' },
     ];
 
     if (!BAGS_API_KEY) {
@@ -30,22 +30,24 @@ export default async function handler(req, res) {
         const sdk = new BagsSDK(BAGS_API_KEY, connection, "processed");
 
         // Fetch lifetime fees for all tokens in parallel
-        const promises = TOKEN_ADDRESSES.map(async (tokenAddress) => {
+        const promises = TOKENS.map(async (token) => {
             try {
-                const feesLamports = await sdk.state.getTokenLifetimeFees(new PublicKey(tokenAddress));
+                const feesLamports = await sdk.state.getTokenLifetimeFees(new PublicKey(token.address));
                 const feesSol = feesLamports / LAMPORTS_PER_SOL;
 
-                console.log(`Token ${tokenAddress}: ${feesSol.toLocaleString()} SOL`);
+                console.log(`Token ${token.name} (${token.address}): ${feesSol.toLocaleString()} SOL`);
 
                 return {
-                    tokenAddress,
+                    tokenAddress: token.address,
+                    name: token.name,
                     feesLamports,
                     feesSol,
                 };
             } catch (error) {
-                console.error(`Error fetching ${tokenAddress}:`, error);
+                console.error(`Error fetching ${token.name}:`, error);
                 return {
-                    tokenAddress,
+                    tokenAddress: token.address,
+                    name: token.name,
                     feesLamports: 0,
                     feesSol: 0,
                     error: error.message
@@ -69,8 +71,11 @@ export default async function handler(req, res) {
             success: true,
             totalRaised: Math.round(totalRaisedUSD),
             totalSol: totalSol,
-            tokenCount: TOKEN_ADDRESSES.length,
-            tokens: results,
+            tokenCount: TOKENS.length,
+            tokens: results.map(r => ({
+                ...r,
+                amountUSD: Math.round((r.feesSol || 0) * 100) // Individual USD amounts
+            })),
             timestamp: new Date().toISOString()
         });
 

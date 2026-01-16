@@ -223,6 +223,9 @@ function initBagsAPIIntegration() {
             // Update the "Total Raised" counter on the page
             updateTotalRaisedDisplay(data.totalRaised);
 
+            // Update individual token amounts on podium
+            updatePodiumAmounts(data.tokens);
+
             console.log('Data updated successfully. Total raised:', data.totalRaised);
             console.log('Tokens tracked:', data.tokenCount);
 
@@ -265,5 +268,20 @@ function initBagsAPIIntegration() {
         }
 
         requestAnimationFrame(update);
+    }
+
+    function updatePodiumAmounts(tokens) {
+        if (!tokens || !tokens.length) return;
+
+        tokens.forEach(token => {
+            // Find podium item by token address
+            const podiumItem = document.querySelector(`[data-token="${token.tokenAddress}"]`);
+            if (podiumItem) {
+                const amountElement = podiumItem.querySelector('.podium-amount');
+                if (amountElement) {
+                    animateCounterToValue(amountElement, token.amountUSD || 0, '$');
+                }
+            }
+        });
     }
 }

@@ -370,6 +370,223 @@ body {
 }
 
 /* ============================================
+   TOP PROJECTS LEADERBOARD
+   ============================================ */
+
+.top-projects {
+    margin-top: 60px;
+    padding-top: 60px;
+    border-top: 1px solid var(--border);
+}
+
+.top-projects-title {
+    font-family: var(--font-serif);
+    font-size: 1.75rem;
+    text-align: center;
+    margin-bottom: 50px;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+}
+
+.podium {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 20px;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.podium-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    max-width: 200px;
+}
+
+.podium-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    width: 100%;
+    margin-bottom: -10px;
+    position: relative;
+    z-index: 2;
+    transition: all 0.3s var(--ease);
+}
+
+.podium-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.1);
+    border-color: var(--border-strong);
+}
+
+.podium-first .podium-card {
+    border-color: #ffd700;
+    box-shadow: 0 8px 32px rgba(255, 215, 0, 0.15);
+}
+
+.podium-first .podium-card:hover {
+    box-shadow: 0 16px 48px rgba(255, 215, 0, 0.25);
+}
+
+.podium-image {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 12px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--bg-tertiary);
+    position: relative;
+}
+
+.podium-first .podium-image {
+    width: 100px;
+    height: 100px;
+    border: 3px solid #ffd700;
+}
+
+.podium-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.podium-placeholder {
+    width: 100%;
+    height: 100%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: var(--bg-tertiary);
+}
+
+.podium-name {
+    display: block;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    letter-spacing: 0.02em;
+}
+
+.podium-amount {
+    display: block;
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    font-weight: 400;
+}
+
+.podium-first .podium-amount {
+    font-size: 1.75rem;
+    color: #b8860b;
+}
+
+.podium-stand {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    color: var(--bg-primary);
+    font-weight: 400;
+    border-radius: 8px 8px 0 0;
+}
+
+.podium-stand-1 {
+    background: linear-gradient(135deg, #ffd700, #ffed4a);
+    height: 100px;
+    color: #8b6914;
+}
+
+.podium-stand-2 {
+    background: linear-gradient(135deg, #c0c0c0, #e8e8e8);
+    height: 70px;
+    color: #666;
+}
+
+.podium-stand-3 {
+    background: linear-gradient(135deg, #cd7f32, #daa06d);
+    height: 50px;
+    color: #8b4513;
+}
+
+.live-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 40px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.live-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--success);
+    border-radius: 50%;
+    animation: livePulse 2s ease-in-out infinite;
+}
+
+@keyframes livePulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.5;
+        transform: scale(1.2);
+    }
+}
+
+@media (max-width: 600px) {
+    .podium {
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .podium-item {
+        width: 100%;
+        max-width: 280px;
+        flex-direction: row;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .podium-card {
+        flex: 1;
+        margin-bottom: 0;
+    }
+
+    .podium-stand {
+        width: 50px;
+        height: 50px !important;
+        border-radius: 8px;
+        flex-shrink: 0;
+    }
+
+    .podium-first {
+        order: -1;
+    }
+
+    .podium-image,
+    .podium-first .podium-image {
+        width: 60px;
+        height: 60px;
+    }
+}
+
+/* ============================================
    ABOUT SECTION
    ============================================ */
 
