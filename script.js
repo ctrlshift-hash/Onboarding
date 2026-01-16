@@ -237,6 +237,8 @@ function initBagsAPIIntegration() {
     function updateTotalRaisedDisplay(totalRaised) {
         // Find the "Total Raised" counter element
         const totalRaisedElement = document.querySelector('.result-value[data-target]');
+        const heroTotalElement = document.getElementById('hero-total-raised');
+        const peopleTotalElement = document.getElementById('people-total-raised');
 
         if (totalRaisedElement) {
             // Update the data-target attribute for future counter animations
@@ -244,6 +246,16 @@ function initBagsAPIIntegration() {
 
             // Animate the counter to the new value
             animateCounterToValue(totalRaisedElement, totalRaised, '$');
+        }
+
+        // Also update the hero section
+        if (heroTotalElement) {
+            animateCounterToValue(heroTotalElement, totalRaised, '$');
+        }
+
+        // Also update the people page
+        if (peopleTotalElement) {
+            animateCounterToValue(peopleTotalElement, totalRaised, '$');
         }
     }
 
