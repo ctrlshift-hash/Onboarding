@@ -9,28 +9,25 @@ export default async function handler(req, res) {
 
     const BAGS_API_KEY = process.env.BAGS_API_KEY;
 
-    // Token data - addresses, names, Twitter handles, images, and Bags.fm links
+    // Token data - addresses, names, Twitter handles, and images
     const TOKENS = [
         {
             address: '9XzKDJ9wP9yqi9G5okp9UFNxFuhqyk5GNyUnnBaRBAGS',
             name: 'DATABUDDY',
             twitter: 'izadoesdev',
-            imageUrl: 'https://static.wixstatic.com/media/e2da02_15d85627525f4cc6ae1c2e21f3e5fa00~mv2.png',
-            bagsUrl: 'https://bags.fm/b/databuddy'
+            imageUrl: 'https://static.wixstatic.com/media/e2da02_15d85627525f4cc6ae1c2e21f3e5fa00~mv2.png'
         },
         {
             address: '71qnmtNQYuSGMi7w8auGEJaStaB1zbJPa5ZZ6mZtBAGS',
             name: 'GITBRUV',
             twitter: 'bruvimtired',
-            imageUrl: 'https://static.wixstatic.com/media/e2da02_294324e2bac24d9d8b6a8381af8b69be~mv2.png',
-            bagsUrl: 'https://bags.fm/b/gitbruv'
+            imageUrl: 'https://static.wixstatic.com/media/e2da02_294324e2bac24d9d8b6a8381af8b69be~mv2.png'
         },
         {
             address: 'GZj4qMQFtwPpStknSaisn7shPJJ7Dv7wsuksEborBAGS',
             name: 'BOUNTY',
             twitter: 'bountydotnew',
-            imageUrl: 'https://static.wixstatic.com/media/e2da02_d997ec21361242b4ad84eff14edd63dc~mv2.png',
-            bagsUrl: 'https://bags.fm/b/bounty'
+            imageUrl: 'https://static.wixstatic.com/media/e2da02_d997ec21361242b4ad84eff14edd63dc~mv2.png'
         },
     ];
 
@@ -68,7 +65,7 @@ export default async function handler(req, res) {
                     feesSol: totalSol,
                     twitter: token.twitter,
                     imageUrl: token.imageUrl,
-                    bagsUrl: token.bagsUrl,
+                    bagsUrl: `https://bags.fm/bag/${token.address}`,
                 };
             } catch (error) {
                 console.error(`Error fetching ${token.name}:`, error);
@@ -78,7 +75,7 @@ export default async function handler(req, res) {
                     feesSol: 0,
                     twitter: token.twitter,
                     imageUrl: token.imageUrl,
-                    bagsUrl: token.bagsUrl,
+                    bagsUrl: `https://bags.fm/bag/${token.address}`,
                     error: error.message
                 };
             }
