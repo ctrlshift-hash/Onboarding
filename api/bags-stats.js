@@ -26,9 +26,10 @@ export default async function handler(req, res) {
         // Initialize Solana connection for metadata
         const connection = new Connection(process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com');
 
-        // Fetch lifetime fees for all tokens
+        // Fetch lifetime fees and creator info for all tokens
         const promises = TOKENS.map(async (token) => {
             try {
+                // Fetch lifetime fees
                 const lifetimeFeesResponse = await fetch(
                     `https://public-api-v2.bags.fm/api/v1/token-launch/lifetime-fees?tokenMint=${token.address}`,
                     { headers: { 'x-api-key': BAGS_API_KEY } }
@@ -44,6 +45,26 @@ export default async function handler(req, res) {
                 if (lifetimeFeesData.success && lifetimeFeesData.response) {
                     const lamports = BigInt(lifetimeFeesData.response);
                     totalSol = Number(lamports) / LAMPORTS_PER_SOL;
+                }
+
+                // Fetch creator info to get Twitter handle
+                let creatorUsername = null;
+                let creatorProvider = null;
+                try {
+                    const creatorsResponse = await fetch(
+                        `https://public-api-v2.bags.fm/api/v1/token-launch/creators?tokenMint=${token.address}`,
+                        { headers: { 'x-api-key': BAGS_API_KEY } }
+                    );
+                    if (creatorsResponse.ok) {
+                        const creatorsData = await creatorsResponse.json();
+                        if (creatorsData.success && creatorsData.response && creatorsData.response.length > 0) {
+                            const creator = creatorsData.response[0];
+                            creatorUsername = creator.providerUsername || null;
+                            creatorProvider = creator.provider || null;
+                        }
+                    }
+                } catch (creatorError) {
+                    console.error(`Error fetching creator for ${token.name}:`, creatorError);
                 }
 
                 // Try to fetch token metadata from Solana
@@ -73,6 +94,8 @@ export default async function handler(req, res) {
                     name: token.name,
                     feesSol: totalSol,
                     iconUrl,
+                    creatorUsername,
+                    creatorProvider,
                 };
             } catch (error) {
                 console.error(`Error fetching ${token.name}:`, error);
@@ -81,6 +104,8 @@ export default async function handler(req, res) {
                     name: token.name,
                     feesSol: 0,
                     iconUrl: null,
+                    creatorUsername: null,
+                    creatorProvider: null,
                     error: error.message
                 };
             }

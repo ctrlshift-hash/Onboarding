@@ -330,12 +330,17 @@ function initBagsAPIIntegration() {
         const sortedTokens = [...tokens].sort((a, b) => (b.amountUSD || 0) - (a.amountUSD || 0));
 
         // Create cards HTML
-        const cardsHTML = sortedTokens.map(token => `
+        const cardsHTML = sortedTokens.map(token => {
+            // Use creator's Twitter username if available, otherwise fallback to token name
+            const displayName = token.creatorUsername ? `@${token.creatorUsername}` : `@${token.name.toLowerCase()}`;
+            const twitterLink = token.creatorUsername ? `https://x.com/${token.creatorUsername}` : null;
+
+            return `
             <div class="person-card">
                 <div class="person-header">
                     <div class="person-avatar">${token.name.charAt(0)}</div>
                     <div class="person-info">
-                        <h3 class="person-name">@${token.name.toLowerCase()}_project</h3>
+                        <h3 class="person-name">${twitterLink ? `<a href="${twitterLink}" target="_blank" rel="noopener">${displayName}</a>` : displayName}</h3>
                         <span class="person-project">${token.name}</span>
                     </div>
                     <span class="person-status">Active</span>
@@ -348,7 +353,7 @@ function initBagsAPIIntegration() {
                 </div>
                 <span class="person-date">January 2025</span>
             </div>
-        `).join('');
+        `}).join('');
 
         // Update featured people on homepage
         if (featuredGrid) {
