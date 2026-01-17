@@ -1,5 +1,5 @@
 // Vercel Serverless Function to fetch Bags.fm data using REST API
-import { LAMPORTS_PER_SOL, Connection, PublicKey } from "@solana/web3.js";
+import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 
 export default async function handler(req, res) {
     // Only allow GET requests
@@ -9,11 +9,29 @@ export default async function handler(req, res) {
 
     const BAGS_API_KEY = process.env.BAGS_API_KEY;
 
-    // Token data - addresses and names
+    // Token data - addresses, names, Twitter handles, images, and Bags.fm links
     const TOKENS = [
-        { address: '9XzKDJ9wP9yqi9G5okp9UFNxFuhqyk5GNyUnnBaRBAGS', name: 'DATABUDDY' },
-        { address: '71qnmtNQYuSGMi7w8auGEJaStaB1zbJPa5ZZ6mZtBAGS', name: 'GITBRUV' },
-        { address: 'GZj4qMQFtwPpStknSaisn7shPJJ7Dv7wsuksEborBAGS', name: 'BOUNTY' },
+        {
+            address: '9XzKDJ9wP9yqi9G5okp9UFNxFuhqyk5GNyUnnBaRBAGS',
+            name: 'DATABUDDY',
+            twitter: 'izadoesdev',
+            imageUrl: 'https://static.wixstatic.com/media/e2da02_15d85627525f4cc6ae1c2e21f3e5fa00~mv2.png',
+            bagsUrl: 'https://bags.fm/b/databuddy'
+        },
+        {
+            address: '71qnmtNQYuSGMi7w8auGEJaStaB1zbJPa5ZZ6mZtBAGS',
+            name: 'GITBRUV',
+            twitter: 'bruvimtired',
+            imageUrl: 'https://static.wixstatic.com/media/e2da02_294324e2bac24d9d8b6a8381af8b69be~mv2.png',
+            bagsUrl: 'https://bags.fm/b/gitbruv'
+        },
+        {
+            address: 'GZj4qMQFtwPpStknSaisn7shPJJ7Dv7wsuksEborBAGS',
+            name: 'BOUNTY',
+            twitter: 'bountydotnew',
+            imageUrl: 'https://static.wixstatic.com/media/e2da02_d997ec21361242b4ad84eff14edd63dc~mv2.png',
+            bagsUrl: 'https://bags.fm/b/bounty'
+        },
     ];
 
     if (!BAGS_API_KEY) {
@@ -23,10 +41,7 @@ export default async function handler(req, res) {
     }
 
     try {
-        // Initialize Solana connection for metadata
-        const connection = new Connection(process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com');
-
-        // Fetch lifetime fees and creator info for all tokens
+        // Fetch lifetime fees for all tokens
         const promises = TOKENS.map(async (token) => {
             try {
                 // Fetch lifetime fees
@@ -47,55 +62,13 @@ export default async function handler(req, res) {
                     totalSol = Number(lamports) / LAMPORTS_PER_SOL;
                 }
 
-                // Fetch creator info to get Twitter handle
-                let creatorUsername = null;
-                let creatorProvider = null;
-                try {
-                    const creatorsResponse = await fetch(
-                        `https://public-api-v2.bags.fm/api/v1/token-launch/creators?tokenMint=${token.address}`,
-                        { headers: { 'x-api-key': BAGS_API_KEY } }
-                    );
-                    if (creatorsResponse.ok) {
-                        const creatorsData = await creatorsResponse.json();
-                        if (creatorsData.success && creatorsData.response && creatorsData.response.length > 0) {
-                            const creator = creatorsData.response[0];
-                            creatorUsername = creator.providerUsername || null;
-                            creatorProvider = creator.provider || null;
-                        }
-                    }
-                } catch (creatorError) {
-                    console.error(`Error fetching creator for ${token.name}:`, creatorError);
-                }
-
-                // Try to fetch token metadata from Solana
-                let iconUrl = null;
-                try {
-                    const mintPubkey = new PublicKey(token.address);
-                    const accountInfo = await connection.getParsedAccountInfo(mintPubkey);
-
-                    // Try to get metadata from token extensions or metaplex
-                    if (accountInfo.value?.data && typeof accountInfo.value.data === 'object' && 'parsed' in accountInfo.value.data) {
-                        const metadata = accountInfo.value.data.parsed?.info?.extensions?.metadata;
-                        if (metadata?.uri) {
-                            // Fetch metadata JSON
-                            const metadataResponse = await fetch(metadata.uri);
-                            if (metadataResponse.ok) {
-                                const metadataJson = await metadataResponse.json();
-                                iconUrl = metadataJson.image || null;
-                            }
-                        }
-                    }
-                } catch (metadataError) {
-                    console.error(`Error fetching metadata for ${token.name}:`, metadataError);
-                }
-
                 return {
                     tokenAddress: token.address,
                     name: token.name,
                     feesSol: totalSol,
-                    iconUrl,
-                    creatorUsername,
-                    creatorProvider,
+                    twitter: token.twitter,
+                    imageUrl: token.imageUrl,
+                    bagsUrl: token.bagsUrl,
                 };
             } catch (error) {
                 console.error(`Error fetching ${token.name}:`, error);
@@ -103,9 +76,9 @@ export default async function handler(req, res) {
                     tokenAddress: token.address,
                     name: token.name,
                     feesSol: 0,
-                    iconUrl: null,
-                    creatorUsername: null,
-                    creatorProvider: null,
+                    twitter: token.twitter,
+                    imageUrl: token.imageUrl,
+                    bagsUrl: token.bagsUrl,
                     error: error.message
                 };
             }
@@ -143,8 +116,7 @@ export default async function handler(req, res) {
             tokenCount: TOKENS.length,
             tokens: results.map(r => ({
                 ...r,
-                amountUSD: Math.round((r.feesSol || 0) * solPrice), // Individual USD amounts with real SOL price
-                iconUrl: r.iconUrl // Token icon URL from metadata
+                amountUSD: Math.round((r.feesSol || 0) * solPrice)
             })),
             timestamp: new Date().toISOString()
         });

@@ -331,28 +331,31 @@ function initBagsAPIIntegration() {
 
         // Create cards HTML
         const cardsHTML = sortedTokens.map(token => {
-            // Use creator's Twitter username if available, otherwise fallback to token name
-            const displayName = token.creatorUsername ? `@${token.creatorUsername}` : `@${token.name.toLowerCase()}`;
-            const twitterLink = token.creatorUsername ? `https://x.com/${token.creatorUsername}` : null;
+            const displayName = `@${token.twitter}`;
+            const twitterLink = `https://x.com/${token.twitter}`;
+            const bagsLink = token.bagsUrl || '#';
+            const avatarImg = token.imageUrl ? `<img src="${token.imageUrl}" alt="${token.name}" class="person-avatar-img">` : token.name.charAt(0);
 
             return `
-            <div class="person-card">
-                <div class="person-header">
-                    <div class="person-avatar">${token.name.charAt(0)}</div>
-                    <div class="person-info">
-                        <h3 class="person-name">${twitterLink ? `<a href="${twitterLink}" target="_blank" rel="noopener">${displayName}</a>` : displayName}</h3>
-                        <span class="person-project">${token.name}</span>
+            <a href="${bagsLink}" target="_blank" rel="noopener" class="person-card-link">
+                <div class="person-card">
+                    <div class="person-header">
+                        <div class="person-avatar">${avatarImg}</div>
+                        <div class="person-info">
+                            <h3 class="person-name"><span class="twitter-link" onclick="event.preventDefault(); event.stopPropagation(); window.open('${twitterLink}', '_blank');">${displayName}</span></h3>
+                            <span class="person-project">${token.name}</span>
+                        </div>
+                        <span class="person-status">Active</span>
                     </div>
-                    <span class="person-status">Active</span>
-                </div>
-                <div class="person-results">
-                    <div class="person-stat">
-                        <span class="person-stat-value">$${(token.amountUSD || 0).toLocaleString()}</span>
-                        <span class="person-stat-label">Fees Earned</span>
+                    <div class="person-results">
+                        <div class="person-stat">
+                            <span class="person-stat-value">$${(token.amountUSD || 0).toLocaleString()}</span>
+                            <span class="person-stat-label">Fees Earned</span>
+                        </div>
                     </div>
+                    <span class="person-date">January 2025</span>
                 </div>
-                <span class="person-date">January 2025</span>
-            </div>
+            </a>
         `}).join('');
 
         // Update featured people on homepage
