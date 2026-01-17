@@ -10,7 +10,9 @@
       "Bash(ls:*)",
       "Bash(git reset:*)",
       "Bash(powershell -Command \"Invoke-RestMethod -Uri ''https://onboarding.dev/api/bags-stats'' -Method Get | ConvertTo-Json -Depth 10\")",
-      "Bash(powershell -Command:*)"
+      "Bash(powershell -Command:*)",
+      "Bash(awk:*)",
+      "Bash(grep:*)"
     ]
   }
 }
