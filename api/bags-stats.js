@@ -65,7 +65,7 @@ export default async function handler(req, res) {
                     feesSol: totalSol,
                     twitter: token.twitter,
                     imageUrl: token.imageUrl,
-                    bagsUrl: `https://bags.fm/bag/${token.address}`,
+                    bagsUrl: `https://bags.fm/${token.address}`,
                 };
             } catch (error) {
                 console.error(`Error fetching ${token.name}:`, error);
@@ -75,7 +75,7 @@ export default async function handler(req, res) {
                     feesSol: 0,
                     twitter: token.twitter,
                     imageUrl: token.imageUrl,
-                    bagsUrl: `https://bags.fm/bag/${token.address}`,
+                    bagsUrl: `https://bags.fm/${token.address}`,
                     error: error.message
                 };
             }
