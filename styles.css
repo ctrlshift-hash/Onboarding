@@ -271,6 +271,12 @@ body {
     font-weight: 600;
 }
 
+#hero-total-raised {
+    display: inline-block;
+    min-width: 80px;
+    text-align: center;
+}
+
 .hero-cta {
     display: flex;
     gap: 16px;
@@ -361,6 +367,8 @@ body {
     line-height: 1.2;
     margin-bottom: 8px;
     letter-spacing: -0.02em;
+    min-width: 100px;
+    text-align: center;
 }
 
 .result-label {
@@ -510,11 +518,14 @@ body {
     font-size: 1.5rem;
     color: var(--text-primary);
     font-weight: 400;
+    min-width: 70px;
+    text-align: center;
 }
 
 .podium-first .podium-amount {
     font-size: 1.75rem;
     color: #b8860b;
+    min-width: 80px;
 }
 
 .podium-stand {
@@ -527,6 +538,11 @@ body {
     color: var(--bg-primary);
     font-weight: 400;
     border-radius: 8px 8px 0 0;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.podium-card:hover + .podium-stand {
+    transform: scale(1.08);
 }
 
 .podium-stand-1 {
@@ -535,16 +551,28 @@ body {
     color: #8b6914;
 }
 
+.podium-card:hover + .podium-stand-1 {
+    box-shadow: 0 10px 30px rgba(255, 215, 0, 0.5);
+}
+
 .podium-stand-2 {
     background: linear-gradient(135deg, #c0c0c0, #e8e8e8);
     height: 70px;
     color: #666;
 }
 
+.podium-card:hover + .podium-stand-2 {
+    box-shadow: 0 10px 30px rgba(192, 192, 192, 0.5);
+}
+
 .podium-stand-3 {
     background: linear-gradient(135deg, #cd7f32, #daa06d);
     height: 50px;
     color: #8b4513;
+}
+
+.podium-card:hover + .podium-stand-3 {
+    box-shadow: 0 10px 30px rgba(205, 127, 50, 0.5);
 }
 
 .live-indicator {
