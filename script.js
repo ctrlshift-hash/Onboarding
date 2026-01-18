@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initSmoothScroll();
     initCardHoverEffects();
     initBagsAPIIntegration();
+    initReferralButton();
 });
 
 // ============================================
@@ -367,5 +368,37 @@ function initBagsAPIIntegration() {
         if (peopleFullGrid) {
             peopleFullGrid.innerHTML = cardsHTML;
         }
+    }
+}
+
+// ============================================
+// REFERRAL BUTTON TOGGLE
+// ============================================
+
+function initReferralButton() {
+    const referralBtn = document.getElementById('referral-btn');
+    const referralOptions = document.getElementById('referral-options');
+
+    if (referralBtn && referralOptions) {
+        referralBtn.addEventListener('click', () => {
+            referralOptions.classList.toggle('active');
+
+            // Update button text
+            if (referralOptions.classList.contains('active')) {
+                referralBtn.innerHTML = `
+                    Close
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                `;
+            } else {
+                referralBtn.innerHTML = `
+                    Refer Someone
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                `;
+            }
+        });
     }
 }
