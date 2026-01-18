@@ -898,6 +898,26 @@ body {
     font-weight: 600;
     font-size: 0.9rem;
     color: var(--text-secondary);
+    overflow: hidden;
+}
+
+.testimonial-avatar-link {
+    display: block;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.testimonial-avatar-link:hover {
+    transform: scale(1.1);
+}
+
+.testimonial-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .testimonial-info {
@@ -909,12 +929,24 @@ body {
     font-weight: 600;
     font-size: 0.95rem;
     color: var(--text-primary);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a.testimonial-name:hover {
+    color: #1DA1F2;
 }
 
 .testimonial-project {
     font-size: 0.85rem;
     color: var(--success);
     font-weight: 500;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a.testimonial-project:hover {
+    color: #1ed760;
 }
 
 /* ============================================
