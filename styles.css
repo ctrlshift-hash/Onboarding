@@ -104,6 +104,9 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 48px;
 }
 
 .logo {
@@ -123,13 +126,13 @@ body {
 .nav-right {
     display: flex;
     align-items: center;
-    gap: 24px;
+    gap: 32px;
 }
 
 .nav-links {
     display: flex;
     align-items: center;
-    gap: 32px;
+    gap: 40px;
 }
 
 .nav-links a {
