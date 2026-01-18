@@ -405,6 +405,7 @@ body {
     max-width: 200px;
     text-decoration: none;
     color: inherit;
+    cursor: pointer;
 }
 
 .podium-card {
@@ -417,13 +418,31 @@ body {
     margin-bottom: -10px;
     position: relative;
     z-index: 2;
-    transition: all 0.3s var(--ease);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .podium-card:hover {
-    transform: translateY(-12px) scale(1.05);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    transform: translateY(-16px) scale(1.08);
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.2);
     border-color: var(--border-strong);
+}
+
+.podium-card:hover .podium-image {
+    transform: scale(1.1);
+}
+
+.podium-card:hover .podium-image img {
+    transform: scale(1.15);
+}
+
+.podium-second .podium-card:hover {
+    box-shadow: 0 25px 70px rgba(192, 192, 192, 0.3);
+    border-color: #c0c0c0;
+}
+
+.podium-third .podium-card:hover {
+    box-shadow: 0 25px 70px rgba(205, 127, 50, 0.3);
+    border-color: #cd7f32;
 }
 
 .podium-first .podium-card {
@@ -432,8 +451,9 @@ body {
 }
 
 .podium-first .podium-card:hover {
-    transform: translateY(-14px) scale(1.08);
-    box-shadow: 0 24px 70px rgba(255, 215, 0, 0.35);
+    transform: translateY(-20px) scale(1.12);
+    box-shadow: 0 30px 80px rgba(255, 215, 0, 0.4);
+    border-color: #ffd700;
 }
 
 .podium-image {
@@ -444,6 +464,11 @@ body {
     overflow: hidden;
     background: var(--bg-tertiary);
     position: relative;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.podium-image img {
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .podium-first .podium-image {
